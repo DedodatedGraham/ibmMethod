@@ -192,14 +192,14 @@ double dirichlet_gradient (Point point, scalar s, scalar cs,
   return nodata;
 }
 
-double embed_geometry (Point point, coord * b, coord * n)
-{
-  *n = facet_normal (point, vof, isf);
-  double alpha = plane_alpha (vof[], *n);
-  double area = plane_area_center (*n, alpha, b);
-  normalize (n);
-  return area;
-}
+//double embed_geometry (Point point, coord * b, coord * n)
+//{
+//  *n = facet_normal (point, vof, isf);
+//  double alpha = plane_alpha (vof[], *n);
+//  double area = plane_area_center (*n, alpha, b);
+//  normalize (n);
+//  return area;
+//}
 
 double embed_interpolate (Point point, scalar s, coord p)
 {
