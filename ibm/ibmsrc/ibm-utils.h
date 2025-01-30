@@ -1,4 +1,4 @@
-extern scalar vof;
+extern scalar ibm;
 extern face vector isf;
 
 
@@ -104,17 +104,17 @@ double delta_func (coord sPoint, coord markerPoint, double dv,double Delta)
     return dphi/dv; 
 }
 
-bool empty_neighbor (Point point, coord * pc, scalar vof)
+bool empty_neighbor (Point point, coord * pc, scalar ibm)
 {
     coord pc_temp;
-    double temp_vof = vof[];
+    double temp_ibm = ibm[];
     double xc = x;
     double yc = y;
     double max_d = 1e6;
     int neighbor = 0;
 
     foreach_neighbor(1)
-        if (vof[] == 0 && temp_vof == 1 && (distance(x - xc, y - yc) < max_d)) {
+        if (ibm[] == 0 && temp_ibm == 1 && (distance(x - xc, y - yc) < max_d)) {
             pc_temp.x = (xc + x) / 2.;
             pc_temp.y = (yc + y) / 2.;
             max_d = distance(x - xc, y - yc);
@@ -124,15 +124,15 @@ bool empty_neighbor (Point point, coord * pc, scalar vof)
    return neighbor;
 }
 
-double marker_point (Point point, scalar vof, coord * markerPoint)
+double marker_point (Point point, scalar ibm, coord * markerPoint)
 {
 #if dimension == 3
     coord cellCenter = {x, y, z};
 #else
     coord cellCenter = {x, y};
 #endif
-    coord n = interface_normal (point, vof);
-    double alpha = plane_alpha (vof[], n);
+    coord n = interface_normal (point, ibm);
+    double alpha = plane_alpha (ibm[], n);
     double area = plane_area_center (n, alpha, markerPoint);
 
     foreach_dimension()
@@ -205,7 +205,7 @@ double embed_interpolate (Point point, scalar s, coord p)
 {
   assert (dimension == 2);
   int i = sign(p.x), j = sign(p.y);
-  if (vof[i] < 0.5 && vof[0,j] < 0.5 && vof[i,j] < 0.5)
+  if (ibm[i] < 0.5 && ibm[0,j] < 0.5 && ibm[i,j] < 0.5)
     // bilinear interpolation when all neighbors are defined
     return ((s[]*(1. - fabs(p.x)) + s[i]*fabs(p.x))*(1. - fabs(p.y)) + 
 	    (s[0,j]*(1. - fabs(p.x)) + s[i,j]*fabs(p.x))*fabs(p.y));
@@ -215,9 +215,9 @@ double embed_interpolate (Point point, scalar s, coord p)
     double val = s[];
     foreach_dimension() {
       int i = sign(p.x);
-      if (vof[i])
+      if (ibm[i])
 	val += fabs(p.x)*(s[i] - s[]);
-      else if (vof[-i])
+      else if (ibm[-i])
 	val += fabs(p.x)*(s[] - s[-i]);
     }
     return val;
@@ -230,14 +230,14 @@ coord embed_gradient (Point point, vector u, coord p, coord n, coord bc)
 {
   coord markerCoord, boundaryCondition, dudn;
 
-  marker_point(point, vof, &markerCoord);
+  marker_point(point, ibm, &markerCoord);
   bilinear_interpolation(point, u, markerCoord, &boundaryCondition);
 
   foreach_dimension() {
     bool dirichlet = true;
     if (dirichlet) {
       double val;
-      dudn.x = dirichlet_gradient (point, u.x, vof, n, p, boundaryCondition, &val);
+      dudn.x = dirichlet_gradient (point, u.x, ibm, n, p, boundaryCondition, &val);
       dudn.x += u.x[]*val;
     }
     else // Neumann
@@ -283,7 +283,7 @@ coord ibm_gradient (Point point, vector u, coord markerCoord, coord n)
 {
     coord dudn, boundaryCondition;
 
-    marker_point(point, vof, &markerCoord);
+    marker_point(point, ibm, &markerCoord);
     bilinear_interpolation(point, u, markerCoord, &boundaryCondition);
 
     foreach_dimension()
@@ -390,7 +390,7 @@ coord ibm_gradientv2 (Point point, vector u, coord markerCoord, coord n)
 {
     coord dudn, boundaryCondition;
 
-    marker_point(point, vof, &markerCoord);
+    marker_point(point, ibm, &markerCoord);
     bilinear_interpolation(point, u, markerCoord, &boundaryCondition);
 
     foreach_dimension()
